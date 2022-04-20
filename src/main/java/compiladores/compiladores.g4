@@ -4,16 +4,66 @@ grammar compiladores;
 package compiladores;
 }
 
-fragment LETRA : [A-Za-z] ;
-fragment DIGITO : [0-9] ;
+/* 
+declaracion -> int x;
+               double y;
+               int z = 0;
+               double w, q, t;
+               int a = 5, b, c = 10;
 
-NUMERO : DIGITO+ ;
-OTRO : . ;
+asignacion -> x = 1;
+              z = y;
 
-ID : (LETRA | '_')(LETRA | DIGITO | '_')+ ;
+iwhile -> while (x comp y) { instrucciones } 
+*/
 
-s : ID     { System.out.println("ID ->" + $ID.getText() + "<--"); }         s
-  | NUMERO { System.out.println("NUMERO ->" + $NUMERO.getText() + "<--"); } s
-  | OTRO   { System.out.println("Otro ->" + $OTRO.getText() + "<--"); }     s
-  | EOF
-  ;
+
+fragment DIGIT : '0'..'9';
+fragment LETTER : 'a'..'z' | 'A'..'Z';
+fragment DOUBLE : 'double';
+fragment INT : 'int';
+
+
+/*
+CA : '[';
+CC : ']';
+*/
+
+PA : '(';
+PC : ')';
+LA : '{';
+LC : '}';
+END : ';';
+COMA : ',';
+ASSIGN : '=';
+WS : [ \t\n\r]+ -> skip;
+
+VARTYPE: INT | DOUBLE;
+VARNAME : ('_' | LETTER) (LETTER | DIGIT | '_')* ;
+NUMBER : DIGIT+;
+COMP : '==' | '!=' | '<' | '>' | '>=' | '<=';
+
+
+programa : instrucciones EOF;
+
+instrucciones : instruccion instrucciones | ;
+
+instruccion : inst_simple
+            | bloque
+            | iwhile
+            ;
+
+inst_simple : asignacion END
+             | declaracion END
+             ;
+
+bloque : LA instrucciones LC;
+
+declaracion : VARTYPE variables;
+variables : VARNAME COMA variables | VARNAME | asignacion COMA variables | asignacion;
+
+asignacion : VARNAME '=' (NUMBER | VARNAME);
+
+iwhile : 'while' PA condicion PC;
+condicion : VARNAME COMP (NUMBER | VARNAME);
+
